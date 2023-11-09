@@ -112,46 +112,75 @@ defmodule GameTest do
 
   def pollinate_random(world) do
     random_cell = choose_random_cell(world)
-    _cell = elem(random_cell, 0)
+    cell = elem(random_cell, 0)
+
     x = Nx.to_number(elem(random_cell, 1))
     y = Nx.to_number(elem(random_cell, 2))
-    world = Nx.indexed_add(world, Nx.tensor([x, y, 1]), 1)
 
-    world
+    IO.puts(Nx.to_number(cell[1]))
+    cond do
+      Nx.to_number(cell[1]) == 0 ->
+        world = Nx.indexed_add(world, Nx.tensor([x, y, 1]), 1)
+        world
+      Nx.to_number(cell[1]) == 1 ->
+        world
+    end
+    #     world = Nx.indexed_add(world, Nx.tensor([x, y, 1]), 1)
+    #     world
+    # world
   end
 
   def update_cell(world, x, y) do
     # get cell
     cell = get_cell(world, x, y)
-    is_allive = Nx.to_number(cell[2])
-    {neighbours, x_offset, y_offset} = get_neighbours(world, x, y)
+    cell_num = Nx.to_number(cell[0])
+    is_allive = Nx.to_number(cell[1])
+    energy_amt = Nx.to_number(cell[2])
+    {neighbours, _x_offset, _y_offset} = get_neighbours(world, x, y)
     energy_per_round = 10
     # check status
     cond do
       # 0 means cell is dead
       is_allive == 0 ->
         # check status of neighbours
+        # we can use the mode function to get the most common value
+        # (if there are multiple organism types)
         sum = Nx.sum(neighbours[cell_info: 1])
         cond do
           # if there is at least one neighbour, cell is born
           sum > 0 ->
-            Nx.indexed_add(world, Nx.tensor([x, y, 1]), 1)
+            cell = Nx.tensor([cell_num, 1, energy_amt], names: [:cell_info], type: {:u, 32})
+            cell
+
+          # if there are no neighbours, cell stays dead
+          sum == 0 ->
+            cell
         end
 
-      # 1 means cell is alive
+      # 0 < means cell is alive / has organism in it
       is_allive == 1 ->
         # eat x energy_amt
         energy_amt = Nx.to_number(cell[2])
         cond do
           # check if cell has enough energy
-          energy_amt > energy_per_round ->
+          energy_amt >= energy_per_round ->
             # eat x energy_amt
-            Nx.indexed_add(world, Nx.tensor([x, y, 2]), -energy_per_round)
+            cell = Nx.tensor([cell_num, 1, energy_amt - energy_per_round], names: [:cell_info], type: {:u, 32})
+            cell
 
-          # if not, cell dies
-          energy_amt <= energy_per_round ->
-            Nx.indexed_add(world, Nx.tensor([x, y, 1]), -1)
+            # if not, cell dies
+          energy_amt < energy_per_round ->
+            cell = Nx.tensor([cell_num, 0, 0], names: [:cell_info], type: {:u, 32})
+            cell
         end
     end
+  end
+
+  def update_world(world, x, y, cell) do
+    IO.inspect(cell)
+    # index does not have to be updated
+    world = Nx.indexed_put(world, Nx.tensor([x, y, 1]), cell[1])
+    world = Nx.indexed_put(world, Nx.tensor([x, y, 2]), cell[2])
+    world
   end
 end
