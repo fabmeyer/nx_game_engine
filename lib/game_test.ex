@@ -120,4 +120,38 @@ defmodule GameTest do
     world
   end
 
+  def update_cell(world, x, y) do
+    # get cell
+    cell = get_cell(world, x, y)
+    is_allive = Nx.to_number(cell[2])
+    {neighbours, x_offset, y_offset} = get_neighbours(world, x, y)
+    energy_per_round = 10
+    # check status
+    cond do
+      # 0 means cell is dead
+      is_allive == 0 ->
+        # check status of neighbours
+        sum = Nx.sum(neighbours[cell_info: 1])
+        cond do
+          # if there is at least one neighbour, cell is born
+          sum > 0 ->
+            Nx.indexed_add(world, Nx.tensor([x, y, 1]), 1)
+        end
+
+      # 1 means cell is alive
+      is_allive == 1 ->
+        # eat x energy_amt
+        energy_amt = Nx.to_number(cell[2])
+        cond do
+          # check if cell has enough energy
+          energy_amt > energy_per_round ->
+            # eat x energy_amt
+            Nx.indexed_add(world, Nx.tensor([x, y, 2]), -energy_per_round)
+
+          # if not, cell dies
+          energy_amt <= energy_per_round ->
+            Nx.indexed_add(world, Nx.tensor([x, y, 1]), -1)
+        end
+    end
+  end
 end
