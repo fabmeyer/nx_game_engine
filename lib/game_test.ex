@@ -48,53 +48,53 @@ defmodule GameTest do
         IO.puts("top left corner")
         neighbours = Nx.slice(world, [x, y, 0], [2, 2, 3])
         {neighbours, 0, 0}
-      # top edge
+
+        # top edge
       x == 0 && y > 0 && y < columns-1 ->
         IO.puts("top edge")
         neighbours = Nx.slice(world, [x, y-1, 0], [2, 3, 3])
-
         {neighbours, 0, 1}
-      # top right corner
+
+        # top right corner
       x == 0 && y == columns-1 ->
         IO.puts("top right corner")
         neighbours = Nx.slice(world, [x, y-1, 0], [2, 2, 3])
-
         {neighbours, 1, 1}
-      # right edge
+
+        # right edge
       x > 0 && x < rows-1 && y == columns-1 ->
         IO.puts("right edge")
         neighbours = Nx.slice(world, [x-1, y-1, 0], [3, 2, 3])
-
         {neighbours, 1, 1}
-      # bottom right corner
+
+        # bottom right corner
       x == rows-1 && y == columns-1 ->
         IO.puts("bottom right corner")
         neighbours = Nx.slice(world, [x-1, y-1, 0], [2, 2, 3])
-
         {neighbours, 1, 1}
-      # bottom edge
+
+        # bottom edge
       x == rows-1 && y > 0 && y < columns-1 ->
         IO.puts("bottom edge")
         neighbours = Nx.slice(world, [x-1, y-1, 0], [2, 3, 3])
-
         {neighbours, 1, 1}
-      # bottom left corner
+
+        # bottom left corner
       x == rows-1 && y == 0 ->
         IO.puts("bottom left corner")
         neighbours = Nx.slice(world, [x-1, y, 0], [2, 2, 3])
-
         {neighbours, 1, 0}
-      # left edge
+
+        # left edge
       x > 0 && x < rows-1 && y == 0 ->
         IO.puts("left edge")
         neighbours = Nx.slice(world, [x-1, y, 0], [3, 2, 3])
-
         {neighbours, 1, 0}
-      # middle (all other cases)
+
+        # middle (all other cases)
       x > 0 && x < rows-1 && y > 0 && y < columns-1 ->
         IO.puts("middle")
         neighbours = Nx.slice(world, [x-1, y-1, 0], [3, 3, 3])
-
         {neighbours, 1, 1}
     end
   end
